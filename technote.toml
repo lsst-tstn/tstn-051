@@ -21,3 +21,6 @@ internal_id = "ribeirot"
 name = "Vera C. Rubin Observatory Project Office"
 internal_id = "RubinObs"
 address = "950 N. Cherry Ave., Tucson, AZ 85719, USA"
+
+[technote.sphinx.intersphinx.projects]
+obs_ops = "https://obs-ops.lsst.io"
