@@ -64,6 +64,18 @@ Examples of new functionality that should *NOT* be merged with the run branch in
 - New SAL Scripts.
 - New Observatory Control class or method in an existing class.
 
+The run branch is collaborative, making it critical to have a clean commit history that is easy to interpret. 
+
+The following practices should be followed when pushing commits to the run branch:
+
+- Always add reference to the file changed in the commit message and make the description as explicit as possible (e.g. instead of "update exp_time config" use "In my_updatated_script.py, update exp_time_config to limit range."
+- Separate changes to different files into their own commits (unless they are for the same bugfix/feature).
+- Separate news fragments into their own commits, don't include them with code changes.
+- Use the git fixup option whenever possible git commit --fixup a12345 to link commits that can later be squashed together.
+- When cherry-picking commits from other feature branches that will not be merged with the run branch, mark them with a clear message. 
+  Instead of "Add new sal script" consider "drop! This commits will be merged on a feature branch. Add new sal script".
+
+
 Managing the Observing Environment
 ==================================
 
