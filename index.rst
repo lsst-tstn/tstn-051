@@ -64,6 +64,18 @@ Examples of new functionality that should *NOT* be merged with the run branch in
 - New SAL Scripts.
 - New Observatory Control class or method in an existing class.
 
+The run branch is collaborative, making it critical to have a clean commit history that is easy to interpret. 
+
+The following practices should be followed when pushing commits to the run branch:
+
+- Always add reference to the file changed in the commit message and make the description as explicit as possible (e.g. instead of "update exp_time config" use "In my_updatated_script.py, update exp_time_config to limit range."
+- Separate changes to different files into their own commits (unless they are for the same bugfix/feature).
+- Separate news fragments into their own commits, don't include them with code changes.
+- Use the git fixup option whenever possible git commit --fixup a12345 to link commits that can later be squashed together.
+- When cherry-picking commits from other feature branches that will not be merged with the run branch, mark them with a clear message. 
+  Instead of "Add new sal script" consider "drop! This commits will be merged on a feature branch. Add new sal script".
+
+
 Managing the Observing Environment
 ==================================
 
@@ -162,7 +174,7 @@ The information is readily available in sasquatch (:sqr:`068`) under the ``obsen
 Observing Environment Repositories
 ----------------------------------
 
-At the time of this writting the following repositories are part of the observing environment:
+At the time of this writing the following repositories are part of the observing environment:
 
 - ts_observatory_control
 - atmospec
@@ -180,6 +192,31 @@ At the time of this writting the following repositories are part of the observin
 - ts_config_mttcs
 
 An updated list can be found in the repository `here <https://github.com/lsst-ts/ts_manage_observing_environment/blob/main/src/repos.rs>`__.
+
+Here we provide additional details on a few of the most frequently updated repositories. 
+
+ts_config_ocs
+^^^^^^^^^^^^^
+This repository contains configuration files for some of the observatory CSCs, including the Scheduler, Watcher, and ESS CSCs among others.
+The Scheduler CSC is one of the most frequently updates repositories in the obsenv as it contains:
+- The scheduler configuration files that define the FBS surveys e.g. ``Scheduler/feature_scheduler/maintel/fbs_config_minimal_fieldsurvey.py``.
+- The scheduler configuration files that define the Scheduler CSC configuration for each survey e.g. ``Scheduler/v7/maintel_fbs_lsstcam_minimal_fieldsurvey.yaml``.
+- The JSON Blocks used by each scheduler e.g. ``Scheduler/observing_blocks_maintel/``. 
+
+ts_observatory_control
+^^^^^^^^^^^^^^^^^^^^^^
+This repository contains high-level functionality used by many of the Sal Scripts for observatory functions. 
+Many SAL Script failures due to software bugs can actually be traced back down to errors in the methods defined in this repository. 
+
+ts_standardscripts and auxtel/ts_maintel_standardscripts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+These repositories contain the SAL Scripts that are available for use on the Script Queue. 
+When changes within the scripts are deployed to these repositories, they will be available on the next execution of the script. 
+No additional operations are needed to pickup changes to the script execution code. 
+
+When changes are applied to a script configuration yaml of an existing script, 
+a user on LOVE will need to use the blue Reload Schema button for the changes to appear. 
+This button will need to be clicked for each ScriptQueue. 
 
 Systems Configured to use the Observing Environment
 ---------------------------------------------------
