@@ -174,7 +174,7 @@ The information is readily available in sasquatch (:sqr:`068`) under the ``obsen
 Observing Environment Repositories
 ----------------------------------
 
-At the time of this writting the following repositories are part of the observing environment:
+At the time of this writing the following repositories are part of the observing environment:
 
 - ts_observatory_control
 - atmospec
@@ -192,6 +192,31 @@ At the time of this writting the following repositories are part of the observin
 - ts_config_mttcs
 
 An updated list can be found in the repository `here <https://github.com/lsst-ts/ts_manage_observing_environment/blob/main/src/repos.rs>`__.
+
+Here we provide additional details on a few of the most frequently updated repositories. 
+
+ts_config_ocs
+^^^^^^^^^^^^^
+This repository contains configuration files for some of the observatory CSCs, including the Scheduler, Watcher, and ESS CSCs among others.
+The Scheduler CSC is one of the most frequently updates repositories in the obsenv as it contains:
+- The scheduler configuration files that define the FBS surveys e.g. ``Scheduler/feature_scheduler/maintel/fbs_config_minimal_fieldsurvey.py``.
+- The scheduler configuration files that define the Scheduler CSC configuration for each survey e.g. ``Scheduler/v7/maintel_fbs_lsstcam_minimal_fieldsurvey.yaml``.
+- The JSON Blocks used by each scheduler e.g. ``Scheduler/observing_blocks_maintel/``. 
+
+ts_observatory_control
+^^^^^^^^^^^^^^^^^^^^^^
+This repository contains high-level functionality used by many of the Sal Scripts for observatory functions. 
+Many SAL Script failures due to software bugs can actually be traced back down to errors in the methods defined in this repository. 
+
+ts_standardscripts and auxtel/ts_maintel_standardscripts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+These repositories contain the SAL Scripts that are available for use on the Script Queue. 
+When changes within the scripts are deployed to these repositories, they will be available on the next execution of the script. 
+No additional operations are needed to pickup changes to the script execution code. 
+
+When changes are applied to a script configuration yaml of an existing script, 
+a user on LOVE will need to use the blue Reload Schema button for the changes to appear. 
+This button will need to be clicked for each ScriptQueue. 
 
 Systems Configured to use the Observing Environment
 ---------------------------------------------------
