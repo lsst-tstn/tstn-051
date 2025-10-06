@@ -161,6 +161,7 @@ At the time of this writing the following repositories are part of the observing
 - ts_maintel_standardscripts
 - ts_wep
 - ts_config_ocs
+- ts_config_scheduler
 - ts_config_attcs
 - ts_config_mttcs
 
@@ -168,13 +169,16 @@ An updated list can be found in the repository `here <https://github.com/lsst-ts
 
 Here we provide additional details on a few of the most frequently updated repositories. 
 
-ts_config_ocs
-^^^^^^^^^^^^^
-This repository contains configuration files for some of the observatory CSCs, including the Scheduler, Watcher, and ESS CSCs among others.
-The Scheduler CSC is one of the most frequently updates repositories in the obsenv as it contains:
+ts_config_scheduler
+^^^^^^^^^^^^^^^^^^^
+The Scheduler configuration repos is one of the most frequently updated repositories in the obsenv as it contains:
 - The scheduler configuration files that define the FBS surveys e.g. ``Scheduler/feature_scheduler/maintel/fbs_config_minimal_fieldsurvey.py``.
 - The scheduler configuration files that define the Scheduler CSC configuration for each survey e.g. ``Scheduler/v7/maintel_fbs_lsstcam_minimal_fieldsurvey.yaml``.
 - The JSON Blocks used by each scheduler e.g. ``Scheduler/observing_blocks_maintel/``. 
+
+ts_config_ocs
+^^^^^^^^^^^^^
+This repository contains configuration files for some of the observatory CSCs, including the Watcher, and ESS CSCs among others.
 
 ts_observatory_control
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -231,7 +235,7 @@ For :external+obs_ops:ref:`user's Jupyter notebook <Observing-Interface-Setup-Co
 Scheduler
 ^^^^^^^^^
 
-The Scheduler uses the observing environment for its configuration, which resides in ts_config_ocs, and to access the scripts configuration for block validation.
+The Scheduler uses the observing environment for its configuration, which resides in ts_config_scheduler, and to access the scripts configuration for block validation.
 This allows us to quickly update the Scheduler configuration and also ensures it has access to the same version for the scripts as the ScriptQueue to perform block configuration validation.
 
 When the Scheduler configuration or block configuration are updated, the CSC needs to be recycled (sent to Standby and back to Enabled) in order for the new settings to be loaded.
