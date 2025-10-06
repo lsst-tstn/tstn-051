@@ -6,8 +6,6 @@ Managing The Observing Environment.
 
    The observing environment is a collection of repositories that are shared between different resources of the system. With it we also provide utilities to manage the environment (change/update branches on each of the repositories) and log actions taken by users.
 
-This is complemented by the so called "run branch", which is a common branch used by the team for hot patches to the system.
-
 This technote describes the details of the Observing Environment and how it is managed by our team.
 
 Introduction
@@ -20,10 +18,7 @@ The idea is that both users and control system will have access to a common coll
 
 Auditing capability is central to the observing environment as it allows us to identify what was being used by the control system at any given time, and also allows us to identify who made changes and when.
 
-In addition to the collection of packages and utilities to help manage the versions of the packages that comprises the observing environment, we have also instituted a procedure to allow concurrent contributions from multiple users to the system.
-This is done by a common branch (referred to as the "run branch") that users can easily identify and contribute to.
-
-Here we describe the procedures adopted by the run branch as well as how to manage their deployment.
+Here we describe the procedures to testing, verifying, and deploying changes tot he observing environment.
 
 The Run Branch
 ==============
@@ -96,21 +91,7 @@ Once logged in to the machine you will have to change to the obsenv user with:
 Then, you can run ``manage_obs_env`` to perform operations on the observing environment.
 
 This cli supports a number of operations to manage the version of the repositories that are part of the observing environment.
-The most common user operations revolve around the run branch and includes:
-
-- Checkout the run branch for a particular repository:
-
-  .. prompt:: bash
-
-    manage_obs_env --action checkout-run-branch --repository <repository-name>
-
-- List run branch:
-
-  .. prompt:: bash
-
-    manage_obs_env --action list-run-branch
-
-  This will print to stdout the name of the run branch.
+The most common user operations include:
 
 - Checkout a specific branch for a particular repository:
 
@@ -118,7 +99,7 @@ The most common user operations revolve around the run branch and includes:
     
     manage_obs_env --action checkout-branch --repository <repository-name> --branch-name <branch-name>
 
-- Checkout a specific version for a particular repository.
+- Checkout a specific version tag for a particular repository.
 
   .. prompt:: bash 
     
@@ -132,14 +113,6 @@ The most common user operations revolve around the run branch and includes:
 
 More advanced operations 
 
-- Register a new run branch:
-  
-  .. prompt:: bash
-
-    manage_obs_env --action register-run-branch --branch-name <branch-name>
-
-  This operation is usually only made once at the start of the run and only need to be repeated when a new run branch is created.
-
 - Reset the observing environment:
 
   .. prompt:: bash
@@ -149,7 +122,7 @@ More advanced operations
   This operation will reset the version of all repositories to their default version.
   The default version is either the version specified in the cycle build file or, if the repository has a run branch, the run branch.
 
-The ``manage_obs_env`` has a number of other operations that are beyong the scope of this document.
+The ``manage_obs_env`` has a number of other operations that are beyond the scope of this document.
 
 Web Interface
 -------------
