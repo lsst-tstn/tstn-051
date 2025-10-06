@@ -12,137 +12,21 @@ Introduction
 ============
 
 The distributed nature of the Vera Rubin Observatory Control System makes it challenging to manage shared application/library software packages between users and the control system.
-In order to mitigate this issue we have created to so called "observing environment".
+In order to mitigate this issue we have created the "observing environment".
 This is a collection of packages that are central for the observatory operation and spans component configurations, SAL Script and other user facing packages.
 The idea is that both users and control system will have access to a common collection of packages that can be easily managed and audited.
 
 Auditing capability is central to the observing environment as it allows us to identify what was being used by the control system at any given time, and also allows us to identify who made changes and when.
 
-Here we describe the procedures to testing, verifying, and deploying changes tot he observing environment.
+Here we describe how the observing environment is used a the different procedures to manage the repositories in the observing environment.
 
-The Run Branch
-==============
+The Observing Environments at the Test Stands and the Summit
+============================================================
 
-The run branch is setup as a sprint workflow to allow continuous development with regular evaluation points to determine which changes should be merged or discarded.
-
-For every sprint (with a standard duration of 2 weeks), the observatory support team will create a ticket associated with the observatory operations support.
-The ticket number is used to define the associated run branch following the project guideline, i.e., ``tickets/<ticket-number>``.
-Branches are created on an as-needed basis on the repositories that comprise the observing environment.
-It is not recommended to use the run branch for repositories outside the observing environment.
-However, it is permitted in cases where hot patches are required.
-
-At the end of every sprint a member of the support team will curate the contributions from the run branch of each repository and either open pull requests to merge these contributions or work with the author of the contributions to get them merged.
-Not all contributions made to the run branch will be merged back during this process.
-Depending on what they are, the support team might request the author to create a dedicated ticket to host larger contributions or request that they be discarded.
-
-The following contributions are accepted as part of the run branch for any individual repository:
-
-- Critical hot fixes.
-  These are the most common usage of the run branch, and it is intended to allow patching things quickly at the production environment.
-- Minor updates to configuration.
-  This are most common on the Scheduler configuration in ``ts_config_ocs`` when an update to an existing survey configuration or block is needed.
-- Minor new features.
-  In general new features should be avoided in the run branch.
-  However, minor new features are accepted in critical situations.
-  For example, a user may need a new configuration parameter on a SAL Script that exposes an existing functionality of the system that was initialy not exposed.
-
-Contributions that fall in the category above can be pushed directly to the run branch and rolled out to the production environment.
-They may also be merged back at the close out of the run.
-
-New functionality should not be developed on the run branch
-Instead, they should be developed as part of their own ticket and merged, at which point the author can coordinate with the support team to either rebase the run branch or cherry-pick the contributions.
-
-Examples of new functionality that should *NOT* be merged with the run branch includes:
-
-- New Scheduler configuration.
-- New observing blocks.
-- New SAL Scripts.
-- New Observatory Control class or method in an existing class.
-
-The run branch is collaborative, making it critical to have a clean commit history that is easy to interpret. 
-
-The following practices should be followed when pushing commits to the run branch:
-
-- Always add reference to the file changed in the commit message and make the description as explicit as possible (e.g. instead of "update exp_time config" use "In my_updatated_script.py, update exp_time_config to limit range."
-- Separate changes to different files into their own commits (unless they are for the same bugfix/feature).
-- Separate news fragments into their own commits, don't include them with code changes.
-- Use the git fixup option whenever possible git commit --fixup a12345 to link commits that can later be squashed together.
-- When cherry-picking commits from other feature branches that will not be merged with the run branch, mark them with a clear message. 
-  Instead of "Add new sal script" consider "drop! This commits will be merged on a feature branch. Add new sal script".
-
-
-Managing the Observing Environment
-==================================
-
-Managing the observing environment is done using the ``manage_obs_env`` cli application.
-The most common use of this application is to checkout the run branch for a selected repository in the observing environment.
-This is done by ssh into one of the bastion hosts on the environment one wants to update;
-
-- For Summit (production environment), this is azar02.cp.lsst.org.
-- For Base Test Stand (BTS), this is tel-hw1.ls.lsst.org.
-- For Tucson Test Stand (TTS), this is tel-hw1.tu.lsst.org.
-
-Once logged in to the machine you will have to change to the obsenv user with:
-
-.. prompt:: bash
-
-   sudo -iu obsenv
-
-Then, you can run ``manage_obs_env`` to perform operations on the observing environment.
-
-This cli supports a number of operations to manage the version of the repositories that are part of the observing environment.
-The most common user operations include:
-
-- Checkout a specific branch for a particular repository:
-
-  .. prompt:: bash 
-    
-    manage_obs_env --action checkout-branch --repository <repository-name> --branch-name <branch-name>
-
-- Checkout a specific version tag for a particular repository.
-
-  .. prompt:: bash 
-    
-    manage_obs_env --action checkout-version --repository <repository-name> --branch-name <version>
-
-- Show current version of the packages:
-
-  .. prompt:: bash
-
-    manage_obs_env --action show-current-versions
-
-More advanced operations 
-
-- Reset the observing environment:
-
-  .. prompt:: bash
-
-    manage_obs_env --action reset
-
-  This operation will reset the version of all repositories to their default version.
-  The default version is either the version specified in the cycle build file or, if the repository has a run branch, the run branch.
-
-The ``manage_obs_env`` has a number of other operations that are beyond the scope of this document.
-
-Web Interface
--------------
-
-For users that prefer graphical interface, there is a web interface available to manage the observing environment.
-These can be accessed at the following urls:
-
-- Summit: https://summit-lsp.lsst.codes/obsenv-management/dashboard
-- BTS: https://base-lsp.lsst.codes/obsenv-management/dashboard
-
-.. _traceability:
-
-Traceability
-------------
-
-One of the key features of the ``manage_obs_env`` application is that it allows us to trace the user actions and the state of the observing environment.
-Whenever a user runs the ``manage_obs_env`` it will publish the action performed, alongside its parameters, time and the user name of who performed it.
-It also publishes a summary of the repositories version after the action is performed.
-
-The information is readily available in sasquatch (:sqr:`068`) under the ``obsenv`` database, and can be inspected using Chronograf.
+We maintain separate observing environment installations for each instance of the control system, 
+including at the Base Test Stand (BTS), Tucson Test Stand (TTS), and the Summit (production environment). 
+As almost all of the repositories in the observing environment involve interactions of multiple systems, 
+the Test Stands serve as a critical step to verify functionality before it is deployed on the Summit. 
 
 Observing Environment Repositories
 ----------------------------------
@@ -201,6 +85,136 @@ No additional operations are needed to pickup changes to the script execution co
 When changes are applied to a script configuration yaml of an existing script, 
 a user on LOVE will need to use the blue Reload Schema button for the changes to appear. 
 This button will need to be clicked for each ScriptQueue. 
+
+Developing features to repositories managed by the Observing Environment
+------------------------------------------------------------------------
+Most of the observing environment repositories are managed by TSSW and follow the standard development practices.
+Development of new features can be initiated by anyone within the project, and each new feature should be documented and ticketed on JIRA ticket. 
+New features should include unit test coverage and detailed change logs and commit messages.
+Feature branches should be reviewed and merged in github, and a request to test and deploy the change should be made to the administrative team. 
+
+Testing Changes to the Observing Environment At the Test Stands
+---------------------------------------------------------------
+The test stands are the primary tool for testing and validating changes to the observing environment. 
+ALL changes to the observing environment (both feature and hotfix) MUST undergo testing at a test stand prior to deployment at the summit. 
+The testing must be witnessed or executed by a member of the admin group responsible for deploying changes to the summit environment. 
+The nature of the test will vary based on the change.
+The results of the test should be recorded before the changes are marked for deployment at the summit. 
+Once the test is complete, the obsenv at the test stand should be reverted to its deployment versions. 
+
+Deploying Changes to the Summit Observing Environment
+-----------------------------------------------------
+For deploying changes to the summit environment, we again must separate the use-cases of standard feature deployments and emergency hot fix deployments. 
+The separation between what qualifies as a hot fix deployment and a standard feature deployment is not black and white, 
+but the general guidance is to use the hot fix deployments sparingly, and only to prevent time loss on-sky. 
+
+Deploying Standard Feature Updates
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+For standard feature deployments, once the feature branch has been merged and the feature has been tested at the test stands, 
+the repository with the new feature should be tagged for release.  
+The deployment of the new feature tag should take place before the afternoon's daytime system checkouts. 
+The time of daytime system checkouts can vary, but at the latest the deployments should be made before the afternoon tag-up meeting. 
+Nominally this means changes should be deployed before 4pm Chile time.  
+An update on changes made should be provided at the afternoon tag-up meeting. 
+
+Deploying Emergency Hot Fixes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Emergency hot fix deployments can be deployed at any time, including during operations, if needed to maintain operations. 
+If needed to minimize loss of on-sky time, testing the hot fix at the base test stand may be skipped at the discretion of the obsenv admin. 
+Emergency hot fixes are expected to be deployed as ticketed branches. 
+Hot fix branches are only intended to be deployed for a short period of time, no longer than 72hrs on the summit. 
+After this time, the hot fix should be marked for development as a new feature or it should be dropped and the obsenv reverted to the current release version.
+
+Authorization for deploying changes to the observing Environment
+----------------------------------------------------------------
+A small number of administrative users has authority to make changes to the summit observing environment. 
+
+At the time of writing, these users include:
+- Tiago Ribeiro
+- Michael Reuter
+- Erik Dennihy
+- David Sanmartim
+
+A much larger number of users is authorized to deploy changes to the test stand observing environments. 
+Users in this group are free to deploy, test, and record their test results on either of the two test stands. 
+Once a new feature has been tested and verified by one of the administrative users above, 
+it can be scheduled for deployment on the summit. 
+
+The ``manage_obs_env cli`` Application
+======================================
+
+Managing the observing environment is done using the ``manage_obs_env`` cli application.
+The most common use of this application is to checkout the run branch for a selected repository in the observing environment.
+This is done by ssh into one of the bastion hosts on the environment one wants to update;
+
+- For Summit (production environment), this is azar02.cp.lsst.org.
+- For Base Test Stand (BTS), this is tel-hw1.ls.lsst.org.
+- For Tucson Test Stand (TTS), this is tel-hw1.tu.lsst.org.
+
+Once logged in to the machine you will have to change to the obsenv user with:
+
+.. prompt:: bash
+
+   sudo -iu obsenv
+
+Then, you can run ``manage_obs_env`` to perform operations on the observing environment.
+
+This cli supports a number of operations to manage the version of the repositories that are part of the observing environment.
+The most common user operations include:
+
+- Checkout a specific branch for a particular repository:
+
+  .. prompt:: bash 
+    
+    manage_obs_env --action checkout-branch --repository <repository-name> --branch-name <branch-name>
+
+- Checkout a specific version tag for a particular repository.
+
+  .. prompt:: bash 
+    
+    manage_obs_env --action checkout-version --repository <repository-name> --branch-name <version>
+
+- Show current version of the packages:
+
+  .. prompt:: bash
+
+    manage_obs_env --action show-current-versions
+
+More advanced operations 
+
+- Reset the observing environment:
+
+  .. prompt:: bash
+
+    manage_obs_env --action reset
+
+  This operation will reset the version of all repositories to their default version.
+  The default version is either the version specified in the cycle build file or, if the repository has a run branch, the run branch.
+
+The ``manage_obs_env`` has a number of other operations that are beyond the scope of this document.
+
+Additional features of the Observing Environment
+================================================
+
+Web Interface
+-------------
+
+For users that prefer graphical interface, there is a web interface available to manage the observing environment.
+These can be accessed at the following urls:
+
+- Summit: https://summit-lsp.lsst.codes/obsenv-management/dashboard
+- BTS: https://base-lsp.lsst.codes/obsenv-management/dashboard
+
+.. _traceability:
+
+Traceability
+------------
+
+One of the key features of the ``manage_obs_env`` application is that it allows us to trace the user actions and the state of the observing environment.
+Whenever a user runs the ``manage_obs_env`` it will publish the action performed, alongside its parameters, time and the user name of who performed it.
+It also publishes a summary of the repositories version after the action is performed.
+
+The information is readily available in sasquatch (:sqr:`068`) under the ``obsenv`` database, and can be inspected using Chronograf.
 
 Systems Configured to use the Observing Environment
 ---------------------------------------------------
