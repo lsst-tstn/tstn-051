@@ -159,6 +159,8 @@ At the time of this writing the following repositories are part of the observing
 - ts_standardscripts
 - ts_auxtel_standardscripts
 - ts_maintel_standardscripts
+- ts_calsys_standardscripts
+- ts_ocs_calsys
 - ts_wep
 - ts_config_ocs
 - ts_config_scheduler
@@ -185,8 +187,13 @@ ts_observatory_control
 This repository contains high-level functionality used by many of the Sal Scripts for observatory functions. 
 Many SAL Script failures due to software bugs can actually be traced back down to errors in the methods defined in this repository. 
 
-ts_standardscripts and auxtel/ts_maintel_standardscripts
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ts_ocs_calsys
+^^^^^^^^^^^^^
+This repository contains high-level functionality used by the Calibration Systems for both AuxTel and MainTel. 
+Many calibration SAL Script failures due to software bugs can actually be traced back down to errors in the methods defined in this repository. 
+
+ts_standardscripts, ts_externalscripts, and ts_auxtel/maintel/calsys_standardscripts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 These repositories contain the SAL Scripts that are available for use on the Script Queue. 
 When changes within the scripts are deployed to these repositories, they will be available on the next execution of the script. 
 No additional operations are needed to pickup changes to the script execution code. 
@@ -204,7 +211,7 @@ ScriptQueue
 ^^^^^^^^^^^
 SAL Scripts launched by the queue will be from the observing environment repositories.
 
-These include; ts_observatory_control, ts_standardscripts, ts_maintel_standardscripts, ts_auxtel_standardscripts and ts_externalscripts.
+These include; ts_observatory_control, ts_standardscripts, ts_maintel_standardscripts, ts_auxtel_standardscripts, ts_calsys_standardscripts, and ts_externalscripts.
 Having these as part of the observing environment allows us to push updates and hot fixes on the fly.
 Once a package is updated, any SAL Script launched after the update will use the updated version.
 There is no need to cycle the ScriptQueue state.
