@@ -6,78 +6,142 @@ Managing The Observing Environment.
 
    The observing environment is a collection of repositories that are shared between different resources of the system. With it we also provide utilities to manage the environment (change/update branches on each of the repositories) and log actions taken by users.
 
-This is complemented by the so called "run branch", which is a common branch used by the team for hot patches to the system.
-
 This technote describes the details of the Observing Environment and how it is managed by our team.
 
 Introduction
 ============
 
 The distributed nature of the Vera Rubin Observatory Control System makes it challenging to manage shared application/library software packages between users and the control system.
-In order to mitigate this issue we have created to so called "observing environment".
+In order to mitigate this issue we have created the "observing environment".
 This is a collection of packages that are central for the observatory operation and spans component configurations, SAL Script and other user facing packages.
 The idea is that both users and control system will have access to a common collection of packages that can be easily managed and audited.
 
 Auditing capability is central to the observing environment as it allows us to identify what was being used by the control system at any given time, and also allows us to identify who made changes and when.
 
-In addition to the collection of packages and utilities to help manage the versions of the packages that comprises the observing environment, we have also instituted a procedure to allow concurrent contributions from multiple users to the system.
-This is done by a common branch (referred to as the "run branch") that users can easily identify and contribute to.
+Here we describe how the observing environment is used a the different procedures to manage the repositories in the observing environment.
 
-Here we describe the procedures adopted by the run branch as well as how to manage their deployment.
+The Observing Environments at the Test Stands and the Summit
+============================================================
 
-The Run Branch
-==============
+We maintain separate observing environment installations for each instance of the control system, 
+including at the Base Test Stand (BTS), Tucson Test Stand (TTS), and the Summit (production environment). 
+As almost all of the repositories in the observing environment involve interactions of multiple systems, 
+the Test Stands serve as a critical step to verify functionality before it is deployed on the Summit. 
 
-The run branch is setup as a sprint workflow to allow continuous development with regular evaluation points to determine which changes should be merged or discarded.
+Observing Environment Repositories
+----------------------------------
 
-For every sprint (with a standard duration of 2 weeks), the observatory support team will create a ticket associated with the observatory operations support.
-The ticket number is used to define the associated run branch following the project guideline, i.e., ``tickets/<ticket-number>``.
-Branches are created on an as-needed basis on the repositories that comprise the observing environment.
-It is not recommended to use the run branch for repositories outside the observing environment.
-However, it is permitted in cases where hot patches are required.
+At the time of this writing the following repositories are part of the observing environment:
 
-At the end of every sprint a member of the support team will curate the contributions from the run branch of each repository and either open pull requests to merge these contributions or work with the author of the contributions to get them merged.
-Not all contributions made to the run branch will be merged back during this process.
-Depending on what they are, the support team might request the author to create a dedicated ticket to host larger contributions or request that they be discarded.
+- ts_observatory_control
+- atmospec
+- spectractor
+- summit_extras
+- summit_utils
+- ts_externalscripts
+- ts_observing_utilities
+- ts_standardscripts
+- ts_auxtel_standardscripts
+- ts_maintel_standardscripts
+- ts_calsys_standardscripts
+- ts_ocs_calsys
+- ts_wep
+- ts_config_ocs
+- ts_config_scheduler
+- ts_config_attcs
+- ts_config_mttcs
 
-The following contributions are accepted as part of the run branch for any individual repository:
+An updated list can be found in the repository `here <https://github.com/lsst-ts/ts_manage_observing_environment/blob/main/src/repos.rs>`__.
 
-- Critical hot fixes.
-  These are the most common usage of the run branch, and it is intended to allow patching things quickly at the production environment.
-- Minor updates to configuration.
-  This are most common on the Scheduler configuration in ``ts_config_ocs`` when an update to an existing survey configuration or block is needed.
-- Minor new features.
-  In general new features should be avoided in the run branch.
-  However, minor new features are accepted in critical situations.
-  For example, a user may need a new configuration parameter on a SAL Script that exposes an existing functionality of the system that was initialy not exposed.
+Here we provide additional details on a few of the most frequently updated repositories. 
 
-Contributions that fall in the category above can be pushed directly to the run branch and rolled out to the production environment.
-They may also be merged back at the close out of the run.
+ts_config_scheduler
+^^^^^^^^^^^^^^^^^^^
+The Scheduler configuration repos is one of the most frequently updated repositories in the obsenv as it contains:
+- The scheduler configuration files that define the FBS surveys e.g. ``Scheduler/feature_scheduler/maintel/fbs_config_minimal_fieldsurvey.py``.
+- The scheduler configuration files that define the Scheduler CSC configuration for each survey e.g. ``Scheduler/v7/maintel_fbs_lsstcam_minimal_fieldsurvey.yaml``.
+- The JSON Blocks used by each scheduler e.g. ``Scheduler/observing_blocks_maintel/``. 
 
-New functionality should not be developed on the run branch
-Instead, they should be developed as part of their own ticket and merged, at which point the author can coordinate with the support team to either rebase the run branch or cherry-pick the contributions.
+ts_config_ocs
+^^^^^^^^^^^^^
+This repository contains configuration files for some of the observatory CSCs, including the Watcher, and ESS CSCs among others.
 
-Examples of new functionality that should *NOT* be merged with the run branch includes:
+ts_observatory_control
+^^^^^^^^^^^^^^^^^^^^^^
+This repository contains high-level functionality used by many of the Sal Scripts for observatory functions. 
+Many SAL Script failures due to software bugs can actually be traced back down to errors in the methods defined in this repository. 
 
-- New Scheduler configuration.
-- New observing blocks.
-- New SAL Scripts.
-- New Observatory Control class or method in an existing class.
+ts_ocs_calsys
+^^^^^^^^^^^^^
+This repository contains high-level functionality used by the Calibration Systems for both AuxTel and MainTel. 
+Many calibration SAL Script failures due to software bugs can actually be traced back down to errors in the methods defined in this repository. 
 
-The run branch is collaborative, making it critical to have a clean commit history that is easy to interpret. 
+ts_standardscripts, ts_externalscripts, and ts_auxtel/maintel/calsys_standardscripts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+These repositories contain the SAL Scripts that are available for use on the Script Queue. 
+When changes within the scripts are deployed to these repositories, they will be available on the next execution of the script. 
+No additional operations are needed to pickup changes to the script execution code. 
 
-The following practices should be followed when pushing commits to the run branch:
+When changes are applied to a script configuration yaml of an existing script, 
+a user on LOVE will need to use the blue Reload Schema button for the changes to appear. 
+This button will need to be clicked for each ScriptQueue. 
 
-- Always add reference to the file changed in the commit message and make the description as explicit as possible (e.g. instead of "update exp_time config" use "In my_updatated_script.py, update exp_time_config to limit range."
-- Separate changes to different files into their own commits (unless they are for the same bugfix/feature).
-- Separate news fragments into their own commits, don't include them with code changes.
-- Use the git fixup option whenever possible git commit --fixup a12345 to link commits that can later be squashed together.
-- When cherry-picking commits from other feature branches that will not be merged with the run branch, mark them with a clear message. 
-  Instead of "Add new sal script" consider "drop! This commits will be merged on a feature branch. Add new sal script".
+Developing features to repositories managed by the Observing Environment
+------------------------------------------------------------------------
+Most of the observing environment repositories are managed by TSSW and follow the standard development practices.
+Development of new features can be initiated by anyone within the project, and each new feature should be documented and ticketed on JIRA ticket. 
+New features should include unit test coverage and detailed change logs and commit messages.
+Feature branches should be reviewed and merged in github, and a request to test and deploy the change should be made to the administrative team. 
 
+Testing Changes to the Observing Environment At the Test Stands
+---------------------------------------------------------------
+The test stands are the primary tool for testing and validating changes to the observing environment. 
+ALL changes to the observing environment (both feature and hotfix) MUST undergo testing at a test stand prior to deployment at the summit. 
+The testing must be witnessed or executed by a member of the admin group responsible for deploying changes to the summit environment. 
+The nature of the test will vary based on the change.
+The results of the test should be recorded before the changes are marked for deployment at the summit. 
+Once the test is complete, the obsenv at the test stand should be reverted to its deployment versions. 
 
-Managing the Observing Environment
-==================================
+Deploying Changes to the Summit Observing Environment
+-----------------------------------------------------
+For deploying changes to the summit environment, we again must separate the use-cases of standard feature deployments and emergency hot fix deployments. 
+The separation between what qualifies as a hot fix deployment and a standard feature deployment is not black and white, 
+but the general guidance is to use the hot fix deployments sparingly, and only to prevent time loss on-sky. 
+
+Deploying Standard Feature Updates
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+For standard feature deployments, once the feature branch has been merged and the feature has been tested at the test stands, 
+the repository with the new feature should be tagged for release.  
+The deployment of the new feature tag should take place before the afternoon's daytime system checkouts. 
+The time of daytime system checkouts can vary, but at the latest the deployments should be made before the afternoon tag-up meeting. 
+Nominally this means changes should be deployed before 4pm Chile time.  
+An update on changes made should be provided at the afternoon tag-up meeting. 
+
+Deploying Emergency Hot Fixes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Emergency hot fix deployments can be deployed at any time, including during operations, if needed to maintain operations. 
+If needed to minimize loss of on-sky time, testing the hot fix at the base test stand may be skipped at the discretion of the obsenv admin. 
+Emergency hot fixes are expected to be deployed as ticketed branches. 
+Hot fix branches are only intended to be deployed for a short period of time, no longer than 72hrs on the summit. 
+After this time, the hot fix should be marked for development as a new feature or it should be dropped and the obsenv reverted to the current release version.
+
+Authorization for deploying changes to the observing Environment
+----------------------------------------------------------------
+A small number of administrative users has authority to make changes to the summit observing environment. 
+
+At the time of writing, these users include:
+- Tiago Ribeiro
+- Michael Reuter
+- Erik Dennihy
+- David Sanmartim
+
+A much larger number of users is authorized to deploy changes to the test stand observing environments. 
+Users in this group are free to deploy, test, and record their test results on either of the two test stands. 
+Once a new feature has been tested and verified by one of the administrative users above, 
+it can be scheduled for deployment on the summit. 
+
+The ``manage_obs_env cli`` Application
+======================================
 
 Managing the observing environment is done using the ``manage_obs_env`` cli application.
 The most common use of this application is to checkout the run branch for a selected repository in the observing environment.
@@ -96,21 +160,7 @@ Once logged in to the machine you will have to change to the obsenv user with:
 Then, you can run ``manage_obs_env`` to perform operations on the observing environment.
 
 This cli supports a number of operations to manage the version of the repositories that are part of the observing environment.
-The most common user operations revolve around the run branch and includes:
-
-- Checkout the run branch for a particular repository:
-
-  .. prompt:: bash
-
-    manage_obs_env --action checkout-run-branch --repository <repository-name>
-
-- List run branch:
-
-  .. prompt:: bash
-
-    manage_obs_env --action list-run-branch
-
-  This will print to stdout the name of the run branch.
+The most common user operations include:
 
 - Checkout a specific branch for a particular repository:
 
@@ -118,7 +168,7 @@ The most common user operations revolve around the run branch and includes:
     
     manage_obs_env --action checkout-branch --repository <repository-name> --branch-name <branch-name>
 
-- Checkout a specific version for a particular repository.
+- Checkout a specific version tag for a particular repository.
 
   .. prompt:: bash 
     
@@ -132,14 +182,6 @@ The most common user operations revolve around the run branch and includes:
 
 More advanced operations 
 
-- Register a new run branch:
-  
-  .. prompt:: bash
-
-    manage_obs_env --action register-run-branch --branch-name <branch-name>
-
-  This operation is usually only made once at the start of the run and only need to be repeated when a new run branch is created.
-
 - Reset the observing environment:
 
   .. prompt:: bash
@@ -149,7 +191,10 @@ More advanced operations
   This operation will reset the version of all repositories to their default version.
   The default version is either the version specified in the cycle build file or, if the repository has a run branch, the run branch.
 
-The ``manage_obs_env`` has a number of other operations that are beyong the scope of this document.
+The ``manage_obs_env`` has a number of other operations that are beyond the scope of this document.
+
+Additional features of the Observing Environment
+================================================
 
 Web Interface
 -------------
@@ -171,53 +216,6 @@ It also publishes a summary of the repositories version after the action is perf
 
 The information is readily available in sasquatch (:sqr:`068`) under the ``obsenv`` database, and can be inspected using Chronograf.
 
-Observing Environment Repositories
-----------------------------------
-
-At the time of this writing the following repositories are part of the observing environment:
-
-- ts_observatory_control
-- atmospec
-- spectractor
-- summit_extras
-- summit_utils
-- ts_externalscripts
-- ts_observing_utilities
-- ts_standardscripts
-- ts_auxtel_standardscripts
-- ts_maintel_standardscripts
-- ts_wep
-- ts_config_ocs
-- ts_config_attcs
-- ts_config_mttcs
-
-An updated list can be found in the repository `here <https://github.com/lsst-ts/ts_manage_observing_environment/blob/main/src/repos.rs>`__.
-
-Here we provide additional details on a few of the most frequently updated repositories. 
-
-ts_config_ocs
-^^^^^^^^^^^^^
-This repository contains configuration files for some of the observatory CSCs, including the Scheduler, Watcher, and ESS CSCs among others.
-The Scheduler CSC is one of the most frequently updates repositories in the obsenv as it contains:
-- The scheduler configuration files that define the FBS surveys e.g. ``Scheduler/feature_scheduler/maintel/fbs_config_minimal_fieldsurvey.py``.
-- The scheduler configuration files that define the Scheduler CSC configuration for each survey e.g. ``Scheduler/v7/maintel_fbs_lsstcam_minimal_fieldsurvey.yaml``.
-- The JSON Blocks used by each scheduler e.g. ``Scheduler/observing_blocks_maintel/``. 
-
-ts_observatory_control
-^^^^^^^^^^^^^^^^^^^^^^
-This repository contains high-level functionality used by many of the Sal Scripts for observatory functions. 
-Many SAL Script failures due to software bugs can actually be traced back down to errors in the methods defined in this repository. 
-
-ts_standardscripts and auxtel/ts_maintel_standardscripts
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-These repositories contain the SAL Scripts that are available for use on the Script Queue. 
-When changes within the scripts are deployed to these repositories, they will be available on the next execution of the script. 
-No additional operations are needed to pickup changes to the script execution code. 
-
-When changes are applied to a script configuration yaml of an existing script, 
-a user on LOVE will need to use the blue Reload Schema button for the changes to appear. 
-This button will need to be clicked for each ScriptQueue. 
-
 Systems Configured to use the Observing Environment
 ---------------------------------------------------
 
@@ -227,7 +225,7 @@ ScriptQueue
 ^^^^^^^^^^^
 SAL Scripts launched by the queue will be from the observing environment repositories.
 
-These include; ts_observatory_control, ts_standardscripts, ts_maintel_standardscripts, ts_auxtel_standardscripts and ts_externalscripts.
+These include; ts_observatory_control, ts_standardscripts, ts_maintel_standardscripts, ts_auxtel_standardscripts, ts_calsys_standardscripts, and ts_externalscripts.
 Having these as part of the observing environment allows us to push updates and hot fixes on the fly.
 Once a package is updated, any SAL Script launched after the update will use the updated version.
 There is no need to cycle the ScriptQueue state.
@@ -258,7 +256,7 @@ For :external+obs_ops:ref:`user's Jupyter notebook <Observing-Interface-Setup-Co
 Scheduler
 ^^^^^^^^^
 
-The Scheduler uses the observing environment for its configuration, which resides in ts_config_ocs, and to access the scripts configuration for block validation.
+The Scheduler uses the observing environment for its configuration, which resides in ts_config_scheduler, and to access the scripts configuration for block validation.
 This allows us to quickly update the Scheduler configuration and also ensures it has access to the same version for the scripts as the ScriptQueue to perform block configuration validation.
 
 When the Scheduler configuration or block configuration are updated, the CSC needs to be recycled (sent to Standby and back to Enabled) in order for the new settings to be loaded.
