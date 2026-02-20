@@ -83,7 +83,7 @@ Managing the observing environment is done using the ``manage_obs_env`` cli appl
 The most common use of this application is to checkout the run branch for a selected repository in the observing environment.
 This is done by ssh into one of the bastion hosts on the environment one wants to update;
 
-- For Summit (production environment), this is azar02.cp.lsst.org.
+- For Summit (production environment), this is azar03.cp.lsst.org.
 - For Base Test Stand (BTS), this is tel-hw1.ls.lsst.org.
 - For Tucson Test Stand (TTS), this is tel-hw1.tu.lsst.org.
 
